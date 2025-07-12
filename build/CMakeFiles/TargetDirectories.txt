@@ -1,0 +1,4 @@
+/home/alex/Протей/ДЗ №6 Сеть/TCP_Calculator/build/CMakeFiles/server.dir
+/home/alex/Протей/ДЗ №6 Сеть/TCP_Calculator/build/CMakeFiles/client.dir
+/home/alex/Протей/ДЗ №6 Сеть/TCP_Calculator/build/CMakeFiles/edit_cache.dir
+/home/alex/Протей/ДЗ №6 Сеть/TCP_Calculator/build/CMakeFiles/rebuild_cache.dir
