@@ -1,6 +1,7 @@
-#include <iostream>
+#include "client.h"
 
 int main(int argc, char* argv[]) {
+    
     if (argc != 5) {
         std::cerr << "Usage: " << argv[0] << " <n> <connections> <server_addr> <server_port>" << std::endl;
         return EXIT_FAILURE;

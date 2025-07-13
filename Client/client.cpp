@@ -31,10 +31,10 @@ void TCPClient::setupEpoll() {
 
 void TCPClient::createConnections() {
     //struct sockaddr_in serv_addr{};
-    sockaddr_in server_addr;
+    sockaddr_in serv_addr;
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(server_port_);
-    
+
     if (inet_pton(AF_INET, server_addr_.c_str(), &serv_addr.sin_addr) <= 0) {
         throw std::runtime_error("invalid address");
     }

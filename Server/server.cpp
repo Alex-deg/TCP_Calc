@@ -1,21 +1,9 @@
-#pragma once
-
-#include <iostream>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <cstring>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/epoll.h>
-#include <sys/socket.h>
-#include <cerrno>
-#include <stdexcept>
-#include <memory>
-
 #include "server.h"
 
-TCPServer::TCPServer(int port) : port_(port), epoll_fd_(-1), server_fd_(-1) {
+TCPServer::TCPServer(int port){
+    this->port_ = port;
+    epoll_fd_ = -1;
+    server_fd_ = -1;
     createSocket();
     setupEpoll();
 }
@@ -33,7 +21,7 @@ void TCPServer::run() {
         if (nfds == -1) {
             throw std::runtime_error("epoll_wait failed");
         }
-
+        //std::string 
         for (int i = 0; i < nfds; ++i) {
             if (events_[i].data.fd == server_fd_) {
                 handleNewConnection();
@@ -44,7 +32,7 @@ void TCPServer::run() {
     }
 }
 
-void createSocket() {
+void TCPServer::createSocket() {
     server_fd_ = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd_ == -1) {
         throw std::runtime_error("socket creation failed");
@@ -60,7 +48,7 @@ void createSocket() {
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port_);
 
-    if (bind(server_fd_, (struct sockaddr*)&address, sizeof(address)) {
+    if (bind(server_fd_, (struct sockaddr*)&address, sizeof(address))) {
         throw std::runtime_error("bind failed");
     }
 
@@ -69,7 +57,7 @@ void createSocket() {
     }
 }
 
-void setupEpoll() {
+void TCPServer::setupEpoll() {
     epoll_fd_ = epoll_create1(0);
     if (epoll_fd_ == -1) {
         throw std::runtime_error("epoll_create1 failed");
@@ -83,7 +71,7 @@ void setupEpoll() {
     }
 }
 
-void handleNewConnection() {
+void TCPServer::handleNewConnection() {
     struct sockaddr_in client_addr{};
     socklen_t addrlen = sizeof(client_addr);
     int client_fd = accept(server_fd_, (struct sockaddr*)&client_addr, &addrlen);
@@ -104,17 +92,41 @@ void handleNewConnection() {
     }
 }
 
-void handleClientData(int fd) {
+void TCPServer::handleClientData(int fd) {
     char buffer[BUF_SIZE] = {0};
-    int valread = read(fd, buffer, BUF_SIZE);
-    
-    if (valread <= 0) {
-        epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr);
-        close(fd);
+    std::string expression;
+    ssize_t valread;
+
+    // Читаем данные, пока не получим весь запрос
+    while (valread = recv(fd, buffer, BUF_SIZE - 1, 0)) {  // -1 для нуль-терминатора
+        if (valread == -1) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                // Данные пока не готовы, выходим из цикла
+                break;
+            } else {
+                // Ошибка чтения
+                perror("recv failed");
+                epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr);
+                close(fd);
+                return;
+            }
+        } else if (valread == 0) {
+            // Клиент закрыл соединение
+            epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr);
+            close(fd);
+            return;
+        }
+
+        // Добавляем полученные данные к выражению
+        buffer[valread] = '\0';  // Гарантируем нуль-терминацию
+        expression += buffer;
+    }
+
+    // Проверяем, есть ли что вычислять
+    if (expression.empty()) {
         return;
     }
 
-    std::string expression(buffer);
     std::cout << "Received expression: " << expression << std::endl;
 
     try {
@@ -129,7 +141,37 @@ void handleClientData(int fd) {
     }
 }
 
-int calculateExpression(const std::string& expr) {
+// void TCPServer::handleClientData(int fd) {
+//     char buffer[BUF_SIZE] = {0};
+
+//     std::string expression = "";
+
+//     while(true){
+//         int valread = recv(fd, buffer, BUF_SIZE, 0); 
+//         if (valread <= 0) {
+//             epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr);
+//             close(fd);
+//             break;
+//         }
+//         expression += std::string(buffer);
+//     }
+
+//     //std::string expression(buffer);
+//     std::cout << "Received expression: " << expression << std::endl;
+
+//     try {
+//         int result = calculateExpression(expression);
+//         std::string response = std::to_string(result);
+//         send(fd, response.c_str(), response.size(), 0);
+//         std::cout << "Sent result: " << response << std::endl;
+//     } catch (const std::exception& e) {
+//         std::cerr << "Error calculating expression: " << e.what() << std::endl;
+//         std::string error = "Error: " + std::string(e.what());
+//         send(fd, error.c_str(), error.size(), 0);
+//     }
+// }
+
+int TCPServer::calculateExpression(const std::string& expr) {
     std::istringstream iss(expr);
     std::vector<std::string> tokens;
     std::string token;

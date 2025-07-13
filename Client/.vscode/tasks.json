@@ -9,8 +9,6 @@
                 "-g",
                 "client_main.cpp",
                 "client.cpp",
-                "server_main.cpp",
-                "server.cpp",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],
@@ -20,7 +18,6 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "files": ["Client"],
             "group": {
                 "kind": "build",
                 "isDefault": true

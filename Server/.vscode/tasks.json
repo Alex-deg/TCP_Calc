@@ -7,8 +7,6 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "client_main.cpp",
-                "client.cpp",
                 "server_main.cpp",
                 "server.cpp",
                 "-o",
@@ -20,7 +18,6 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "files": ["Client"],
             "group": {
                 "kind": "build",
                 "isDefault": true

@@ -1,8 +1,21 @@
 #pragma once
 
+#include <iostream>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <cstring>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/epoll.h>
+#include <sys/socket.h>
+#include <cerrno>
+#include <stdexcept>
+#include <memory>
+
 class TCPServer {
 public:
-    TCPServer(int port) : port_(port), epoll_fd_(-1), server_fd_(-1);
+    TCPServer(int port);
     void run();
     ~TCPServer();
 private:
