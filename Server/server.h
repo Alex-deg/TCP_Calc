@@ -13,12 +13,15 @@
 #include <stdexcept>
 #include <memory>
 #include <fcntl.h>
+#include <stack>
+#include "Calculating/Calculator.h"
 
 class TCPServer {
 public:
     TCPServer(int port);
     void run();
     ~TCPServer();
+    
 private:
     static const int MAX_EVENTS = 10;
     static const int BUF_SIZE = 1024;
@@ -32,6 +35,13 @@ private:
     void setupEpoll();
     void handleNewConnection();
     void handleClientData(int fd);
-    int calculateExpression(const std::string& expr);
+
+    // int precedence(char op);
+    // int applyOp(int a, int b, char op);
+    // int calculateExpression(const std::string& expr);
+
     int set_nonblocking(int fd);
+
+    std::string client_request;
+
 };

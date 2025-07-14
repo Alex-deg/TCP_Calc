@@ -61,25 +61,26 @@ void TCPClient::createConnections() {
         // Generate expression
         std::ostringstream expr;
         expr << num_dist(gen);
-        int expected = std::stoi(expr.str());
-        
+        //int expected = std::stoi(expr.str());
+        int expected;
+
         for (int j = 1; j < n_; ++j) {
             char op = ops[op_dist(gen)];
             int num = num_dist(gen);
-            expr << " " << op << " " << num;
+            expr << op << num;
             
-            switch (op) {
-                case '+': expected += num; break;
-                case '-': expected -= num; break;
-                case '*': expected *= num; break;
-                case '/': 
-                    if (num != 0) expected /= num; 
-                    else expected = 0;
-                    break;
-            }
+            // switch (op) {
+            //     case '+': expected += num; break;
+            //     case '-': expected -= num; break;
+            //     case '*': expected *= num; break;
+            //     case '/': 
+            //         if (num != 0) expected /= num; 
+            //         else expected = 0;
+            //         break;
+            // }
         }
-
-        std::string expression = expr.str();
+        expected = Calculator::calculateExpression(expr.str());
+        std::string expression = expr.str() + " ";
         expected_results_.emplace_back(expression, expected);
         
         // Send expression in fragments

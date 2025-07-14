@@ -14,6 +14,7 @@
 #include <random>
 #include <memory>
 #include <algorithm>
+#include "Calculating/Calculator.h"
 
 class TCPClient {
 public:

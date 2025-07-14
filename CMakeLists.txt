@@ -9,6 +9,8 @@ add_executable(server
     Server/server_main.cpp
     Server/server.cpp
     Server/server.h
+    Calculating/Calculator.cpp
+    Calculating/Calculator.h
 )
 
 target_include_directories(server PRIVATE ${CMAKE_SOURCE_DIR})
@@ -18,6 +20,8 @@ add_executable(client
     Client/client_main.cpp
     Client/client.cpp
     Client/client.h
+    Calculating/Calculator.cpp
+    Calculating/Calculator.h
 )
 
 target_include_directories(client PRIVATE ${CMAKE_SOURCE_DIR})

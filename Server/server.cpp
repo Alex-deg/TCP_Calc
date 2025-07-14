@@ -21,12 +21,24 @@ void TCPServer::run() {
         if (nfds == -1) {
             throw std::runtime_error("epoll_wait failed");
         }
-        //std::string 
         for (int i = 0; i < nfds; ++i) {
             if (events_[i].data.fd == server_fd_) {
+                client_request = "";
                 handleNewConnection();
             } else {
                 handleClientData(events_[i].data.fd);
+                // if(!client_request.empty()){
+                //     try {
+                //         int result = calculateExpression(client_request);
+                //         std::string response = std::to_string(result);
+                //         send(events_[i].data.fd, response.c_str(), response.size(), 0);
+                //         std::cout << "Sent result: " << response << std::endl;
+                //     } catch (const std::exception& e) {
+                //         std::cerr << "Error calculating expression: " << e.what() << std::endl;
+                //         std::string error = "Error: " + std::string(e.what());
+                //         send(events_[i].data.fd, error.c_str(), error.size(), 0);
+                //     }
+                // }
             }
         }
     }
@@ -98,43 +110,46 @@ void TCPServer::handleNewConnection() {
 
 void TCPServer::handleClientData(int fd) {
     char buffer[BUF_SIZE] = {0};
-    std::string expression;
     ssize_t valread;
-
     // Читаем данные, пока не получим весь запрос
-    while (valread = recv(fd, buffer, BUF_SIZE - 1, 0)) {  // -1 для нуль-терминатора
+    while (true) {
+        valread = recv(fd, buffer, BUF_SIZE, 0);
         if (valread == -1) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 // Данные пока не готовы, выходим из цикла
-                break;
+                return;
             } else {
                 // Ошибка чтения
-                perror("recv failed");
+                std::cerr << "recv failed" << std::endl;
                 epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr);
                 close(fd);
-                return;
+                break;
             }
         } else if (valread == 0) {
             // Клиент закрыл соединение
             epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr);
             close(fd);
-            return;
+            break;
         }
 
         // Добавляем полученные данные к выражению
         buffer[valread] = '\0';  // Гарантируем нуль-терминацию
-        expression += buffer;
+        client_request += buffer;
+        if(client_request.find(' ') != std::string::npos){
+            std::cout << "Передача данных закончена" << std::endl;
+            break;
+        }
     }
 
     // Проверяем, есть ли что вычислять
-    if (expression.empty()) {
+    if (client_request.empty()) {
         return;
     }
 
-    std::cout << "Received expression: " << expression << std::endl;
+    std::cout << "Received expression: " << client_request << std::endl;
 
     try {
-        int result = calculateExpression(expression);
+        int result = Calculator::calculateExpression(client_request);
         std::string response = std::to_string(result);
         send(fd, response.c_str(), response.size(), 0);
         std::cout << "Sent result: " << response << std::endl;
@@ -143,74 +158,6 @@ void TCPServer::handleClientData(int fd) {
         std::string error = "Error: " + std::string(e.what());
         send(fd, error.c_str(), error.size(), 0);
     }
-}
-
-// void TCPServer::handleClientData(int fd) {
-//     char buffer[BUF_SIZE] = {0};
-
-//     std::string expression = "";
-
-//     while(true){
-//         int valread = recv(fd, buffer, BUF_SIZE, 0); 
-//         if (valread <= 0) {
-//             epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr);
-//             close(fd);
-//             break;
-//         }
-//         expression += std::string(buffer);
-//     }
-
-//     //std::string expression(buffer);
-//     std::cout << "Received expression: " << expression << std::endl;
-
-//     try {
-//         int result = calculateExpression(expression);
-//         std::string response = std::to_string(result);
-//         send(fd, response.c_str(), response.size(), 0);
-//         std::cout << "Sent result: " << response << std::endl;
-//     } catch (const std::exception& e) {
-//         std::cerr << "Error calculating expression: " << e.what() << std::endl;
-//         std::string error = "Error: " + std::string(e.what());
-//         send(fd, error.c_str(), error.size(), 0);
-//     }
-// }
-
-int TCPServer::calculateExpression(const std::string& expr) {
-    std::istringstream iss(expr);
-    std::vector<std::string> tokens;
-    std::string token;
-    
-    while (iss >> token) {
-        tokens.push_back(token);
-    }
-
-    if (tokens.empty()) return 0;
-
-    int result = std::stoi(tokens[0]);
-    
-    for (size_t i = 1; i < tokens.size(); i += 2) {
-        if (i + 1 >= tokens.size()) break;
-        
-        std::string op = tokens[i];
-        int num = std::stoi(tokens[i+1]);
-        
-        if (op == "+") {
-            result += num;
-        } else if (op == "-") {
-            result -= num;
-        } else if (op == "*") {
-            result *= num;
-        } else if (op == "/") {
-            if (num == 0) {
-                throw std::runtime_error("division by zero");
-            }
-            result /= num;
-        } else {
-            throw std::runtime_error("invalid operator: " + op);
-        }
-    }
-    
-    return result;
 }
 
 int TCPServer::set_nonblocking(int fd)
