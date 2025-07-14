@@ -3,7 +3,7 @@
 int main(int argc, char* argv[]) {
     
     if (argc != 5) {
-        std::cerr << "Usage: " << argv[0] << " <n> <connections> <server_addr> <server_port>" << std::endl;
+        std::cerr << "Слишком мало аргументов: должно быть 5" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
         TCPClient client(server_addr, server_port, n, connections);
         client.run();
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "Ошибка: " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
 

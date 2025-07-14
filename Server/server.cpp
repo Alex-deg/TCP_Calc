@@ -27,18 +27,6 @@ void TCPServer::run() {
                 handleNewConnection();
             } else {
                 handleClientData(events_[i].data.fd);
-                // if(!client_request.empty()){
-                //     try {
-                //         int result = calculateExpression(client_request);
-                //         std::string response = std::to_string(result);
-                //         send(events_[i].data.fd, response.c_str(), response.size(), 0);
-                //         std::cout << "Sent result: " << response << std::endl;
-                //     } catch (const std::exception& e) {
-                //         std::cerr << "Error calculating expression: " << e.what() << std::endl;
-                //         std::string error = "Error: " + std::string(e.what());
-                //         send(events_[i].data.fd, error.c_str(), error.size(), 0);
-                //     }
-                // }
             }
         }
     }
@@ -47,7 +35,7 @@ void TCPServer::run() {
 void TCPServer::createSocket() {
     server_fd_ = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd_ == -1) {
-        throw std::runtime_error("socket creation failed");
+        throw std::runtime_error("Не удалось создать сокет");
     }
 
     int opt = 1;
@@ -96,7 +84,7 @@ void TCPServer::handleNewConnection() {
 
     set_nonblocking(client_fd);
 
-    std::cout << "New connection from " << inet_ntoa(client_addr.sin_addr) 
+    std::cout << "Новое подключение от " << inet_ntoa(client_addr.sin_addr) 
                 << ":" << ntohs(client_addr.sin_port) << std::endl;
 
     struct epoll_event ev{};
@@ -111,29 +99,24 @@ void TCPServer::handleNewConnection() {
 void TCPServer::handleClientData(int fd) {
     char buffer[BUF_SIZE] = {0};
     ssize_t valread;
-    // Читаем данные, пока не получим весь запрос
     while (true) {
         valread = recv(fd, buffer, BUF_SIZE, 0);
         if (valread == -1) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                // Данные пока не готовы, выходим из цикла
                 return;
             } else {
-                // Ошибка чтения
                 std::cerr << "recv failed" << std::endl;
                 epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr);
                 close(fd);
                 break;
             }
         } else if (valread == 0) {
-            // Клиент закрыл соединение
             epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr);
             close(fd);
             break;
         }
 
         // Добавляем полученные данные к выражению
-        buffer[valread] = '\0';  // Гарантируем нуль-терминацию
         client_request += buffer;
         if(client_request.find(' ') != std::string::npos){
             std::cout << "Передача данных закончена" << std::endl;

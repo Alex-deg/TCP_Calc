@@ -5,10 +5,10 @@ TCPClient::TCPClient(const std::string& server_addr, int server_port, int n, int
         epoll_fd_(-1) {
 
     if (n < 2) {
-        throw std::invalid_argument("n must be at least 2");
+        throw std::invalid_argument("слишком мало аргументов в выражении: должно быть минимум 2!");
     }
     if (connections < 1) {
-        throw std::invalid_argument("connections must be at least 1");
+        throw std::invalid_argument("tcp сессий должно быть >= 1");
     }
 }
 
@@ -30,13 +30,12 @@ void TCPClient::setupEpoll() {
 }
 
 void TCPClient::createConnections() {
-    //struct sockaddr_in serv_addr{};
     sockaddr_in serv_addr;
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(server_port_);
 
     if (inet_pton(AF_INET, server_addr_.c_str(), &serv_addr.sin_addr) <= 0) {
-        throw std::runtime_error("invalid address");
+        throw std::runtime_error("Неверный ip адресс");
     }
     
     std::random_device rd;
@@ -48,45 +47,34 @@ void TCPClient::createConnections() {
     for (int i = 0; i < connections_; ++i) {
         int sock = socket(AF_INET, SOCK_STREAM, 0);
         if (sock < 0) {
-            std::cerr << "socket creation failed for connection " << i+1 << std::endl;
+            std::cerr << "Не удалось создать сокет для подключения к сесси №" << i+1 << std::endl;
             continue;
         }
 
         if (connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-            std::cerr << "connection failed for connection " << i+1 << std::endl;
+            std::cerr << "Ошибка подключения к сессии №" << i+1 << std::endl;
             close(sock);
             continue;
         }
 
-        // Generate expression
+        // Генерация выражения
         std::ostringstream expr;
         expr << num_dist(gen);
-        //int expected = std::stoi(expr.str());
         int expected;
 
         for (int j = 1; j < n_; ++j) {
             char op = ops[op_dist(gen)];
             int num = num_dist(gen);
             expr << op << num;
-            
-            // switch (op) {
-            //     case '+': expected += num; break;
-            //     case '-': expected -= num; break;
-            //     case '*': expected *= num; break;
-            //     case '/': 
-            //         if (num != 0) expected /= num; 
-            //         else expected = 0;
-            //         break;
-            // }
         }
         expected = Calculator::calculateExpression(expr.str());
         std::string expression = expr.str() + " ";
         expected_results_.emplace_back(expression, expected);
         
-        // Send expression in fragments
+        // Разбиение выражения на части с последующей отправкой
         sendInFragments(sock, expression);
         
-        // Add socket to epoll
+        // Добавляем сокет в epoll
         struct epoll_event ev{};
         ev.events = EPOLLIN;
         ev.data.fd = sock;
@@ -97,8 +85,8 @@ void TCPClient::createConnections() {
         }
 
         sockets_.push_back(sock);
-        std::cout << "Connection " << i+1 << ": Sent expression: " << expression 
-                    << " (expected: " << expected << ")" << std::endl;
+        std::cout << "Сессия " << i+1 << ": Отправленное выражение: " << expression 
+                    << " (ожидается: " << expected << ")" << std::endl;
     }
 }
 
@@ -115,7 +103,7 @@ void TCPClient::sendInFragments(int sock, const std::string& expr) {
         int size = (i == fragments - 1) ? (expr.size() - start) : fragment_size;
         
         send(sock, expr.c_str() + start, size, 0);
-        usleep(10000); // Small delay between fragments
+        usleep(10000); // Небольшая задержка между отправками
     }
 }
 
@@ -134,7 +122,6 @@ void TCPClient::processResponses() {
             int valread = read(sock, buffer, BUF_SIZE);
             
             if (valread <= 0) {
-                // Connection closed or error
                 auto it = std::find(sockets_.begin(), sockets_.end(), sock);
                 if (it != sockets_.end()) {
                     size_t index = it - sockets_.begin();
@@ -146,7 +133,6 @@ void TCPClient::processResponses() {
                 continue;
             }
 
-            // Find which connection this is
             auto it = std::find(sockets_.begin(), sockets_.end(), sock);
             if (it == sockets_.end()) continue;
             
@@ -155,15 +141,14 @@ void TCPClient::processResponses() {
             int expected = expected_results_[index].second;
             
             if (server_result != expected) {
-                std::cerr << "ERROR: Expression: " << expected_results_[index].first 
-                            << " | Server result: " << server_result 
-                            << " | Expected: " << expected << std::endl;
+                std::cerr << "Ошибка: Выражение: " << expected_results_[index].first 
+                            << " | Результат сервера: " << server_result 
+                            << " | Ожидалось: " << expected << std::endl;
             } else {
-                std::cout << "OK: Expression: " << expected_results_[index].first 
-                            << " | Result: " << server_result << std::endl;
+                std::cout << "OK: Выражение: " << expected_results_[index].first 
+                            << " | Результат: " << server_result << std::endl;
             }
             
-            // Remove this connection
             expected_results_.erase(expected_results_.begin() + index);
             sockets_.erase(it);
             epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, sock, nullptr);

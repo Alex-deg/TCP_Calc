@@ -36,10 +36,6 @@ private:
     void handleNewConnection();
     void handleClientData(int fd);
 
-    // int precedence(char op);
-    // int applyOp(int a, int b, char op);
-    // int calculateExpression(const std::string& expr);
-
     int set_nonblocking(int fd);
 
     std::string client_request;
