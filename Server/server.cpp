@@ -52,6 +52,8 @@ void TCPServer::createSocket() {
         throw std::runtime_error("bind failed");
     }
 
+    set_nonblocking(server_fd_);
+
     if (listen(server_fd_, 10) < 0) {
         throw std::runtime_error("listen failed");
     }
@@ -79,6 +81,8 @@ void TCPServer::handleNewConnection() {
         std::cerr << "accept failed" << std::endl;
         return;
     }
+
+    set_nonblocking(client_fd);
 
     std::cout << "New connection from " << inet_ntoa(client_addr.sin_addr) 
                 << ":" << ntohs(client_addr.sin_port) << std::endl;
@@ -207,4 +211,11 @@ int TCPServer::calculateExpression(const std::string& expr) {
     }
     
     return result;
+}
+
+int TCPServer::set_nonblocking(int fd)
+{
+    int flags = fcntl(fd, F_GETFL, 0);
+    if(flags == -1) return -1;
+    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }

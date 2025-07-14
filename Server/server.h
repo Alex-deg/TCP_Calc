@@ -12,6 +12,7 @@
 #include <cerrno>
 #include <stdexcept>
 #include <memory>
+#include <fcntl.h>
 
 class TCPServer {
 public:
@@ -32,4 +33,5 @@ private:
     void handleNewConnection();
     void handleClientData(int fd);
     int calculateExpression(const std::string& expr);
+    int set_nonblocking(int fd);
 };
