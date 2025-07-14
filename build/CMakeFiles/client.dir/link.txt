@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/client.dir/Client/client_main.cpp.o CMakeFiles/client.dir/Client/client.cpp.o -o client 
+/usr/bin/c++ CMakeFiles/client.dir/Client/client_main.cpp.o CMakeFiles/client.dir/Client/client.cpp.o CMakeFiles/client.dir/Calculating/Calculator.cpp.o -o client 

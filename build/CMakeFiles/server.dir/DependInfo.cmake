@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/alex/Протей/ДЗ №6 Сеть/TCP_Calculator/Server/Calculating/Calculator.cpp" "CMakeFiles/server.dir/Server/Calculating/Calculator.cpp.o" "gcc" "CMakeFiles/server.dir/Server/Calculating/Calculator.cpp.o.d"
+  "/home/alex/Протей/ДЗ №6 Сеть/TCP_Calculator/Calculating/Calculator.cpp" "CMakeFiles/server.dir/Calculating/Calculator.cpp.o" "gcc" "CMakeFiles/server.dir/Calculating/Calculator.cpp.o.d"
   "/home/alex/Протей/ДЗ №6 Сеть/TCP_Calculator/Server/server.cpp" "CMakeFiles/server.dir/Server/server.cpp.o" "gcc" "CMakeFiles/server.dir/Server/server.cpp.o.d"
   "/home/alex/Протей/ДЗ №6 Сеть/TCP_Calculator/Server/server_main.cpp" "CMakeFiles/server.dir/Server/server_main.cpp.o" "gcc" "CMakeFiles/server.dir/Server/server_main.cpp.o.d"
   )

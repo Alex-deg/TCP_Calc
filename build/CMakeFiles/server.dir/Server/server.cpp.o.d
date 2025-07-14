@@ -207,4 +207,5 @@ CMakeFiles/server.dir/Server/server.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/struct_stat.h \
  /usr/include/c++/13/stack /usr/include/c++/13/deque \
  /usr/include/c++/13/bits/stl_deque.h /usr/include/c++/13/bits/deque.tcc \
- /usr/include/c++/13/bits/stl_stack.h
+ /usr/include/c++/13/bits/stl_stack.h \
+ /home/alex/Протей/ДЗ\ №6\ Сеть/TCP_Calculator/Calculating/Calculator.h
