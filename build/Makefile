@@ -190,6 +190,30 @@ Client/client_main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/Client/client_main.cpp.s
 .PHONY : Client/client_main.cpp.s
 
+Server/Calculating/Calculator.o: Server/Calculating/Calculator.cpp.o
+.PHONY : Server/Calculating/Calculator.o
+
+# target to build an object file
+Server/Calculating/Calculator.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/Server/Calculating/Calculator.cpp.o
+.PHONY : Server/Calculating/Calculator.cpp.o
+
+Server/Calculating/Calculator.i: Server/Calculating/Calculator.cpp.i
+.PHONY : Server/Calculating/Calculator.i
+
+# target to preprocess a source file
+Server/Calculating/Calculator.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/Server/Calculating/Calculator.cpp.i
+.PHONY : Server/Calculating/Calculator.cpp.i
+
+Server/Calculating/Calculator.s: Server/Calculating/Calculator.cpp.s
+.PHONY : Server/Calculating/Calculator.s
+
+# target to generate assembly for a file
+Server/Calculating/Calculator.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/Server/Calculating/Calculator.cpp.s
+.PHONY : Server/Calculating/Calculator.cpp.s
+
 Server/server.o: Server/server.cpp.o
 .PHONY : Server/server.o
 
@@ -254,6 +278,9 @@ help:
 	@echo "... Client/client_main.o"
 	@echo "... Client/client_main.i"
 	@echo "... Client/client_main.s"
+	@echo "... Server/Calculating/Calculator.o"
+	@echo "... Server/Calculating/Calculator.i"
+	@echo "... Server/Calculating/Calculator.s"
 	@echo "... Server/server.o"
 	@echo "... Server/server.i"
 	@echo "... Server/server.s"
